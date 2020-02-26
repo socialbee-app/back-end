@@ -97,7 +97,45 @@ exports.login = (req, res) => {
 
 // Add user info
 exports.addUserInfo = (req, res) => {
-  let userInfo = reduceUserInfo(req.body)
+  let userInfo = reduceUserInfo(req.body);
+
+  db.doc(`/users/${req.user.username}`)
+    .update(userInfo)
+    .then(() => {
+      return res.json({ message: "User info successfully updated" });
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
+
+// Get own user details
+exports.getAuthenticatedUser = (req, res) => {
+  let userData = {};
+
+  db.doc(`/users/${req.user.username}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.credentials = doc.data();
+        return db
+          .collection("likes")
+          .where("username", "==", req.user.username)
+          .get();
+      }
+    })
+    .then(data => {
+      userData.likes = [];
+      data.forEach(doc => {
+        userData.likes.push(doc.data());
+      });
+      return res.json(userData);
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ error: err.code });
+    });
 };
 
 // Upload profile image for user

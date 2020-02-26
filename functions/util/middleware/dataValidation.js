@@ -56,4 +56,6 @@ exports.reduceUserInfo = data => {
     }
   }
   if (!isEmpty(data.location.trim())) userInfo.location = data.location;
+
+  return userInfo;
 };
