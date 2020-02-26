@@ -22,8 +22,8 @@ let db = {
   ],
   comments: [
     {
-      userHandle: "user",
-      screamId: "kdjsfgdksuufhgkdsufky",
+      username: "user",
+      postId: "kdjsfgdksuufhgkdsufky",
       body: "nice one mate!",
       createdAt: "2019-03-15T10:59:52.798Z"
     }
@@ -33,7 +33,7 @@ let db = {
       recipient: "user",
       sender: "john",
       read: "true | false",
-      screamId: "kdjsfgdksuufhgkdsufky",
+      postId: "kdjsfgdksuufhgkdsufky",
       type: "like | comment",
       createdAt: "2019-03-15T10:59:52.798Z"
     }
@@ -45,7 +45,7 @@ const userDetails = {
   credentials: {
     userId: "N43KJ5H43KJHREW4J5H3JWMERHB",
     email: "user@email.com",
-    handle: "user",
+    username: "user",
     createdAt: "2019-03-15T10:59:52.798Z",
     imageUrl: "image/dsfsdkfghskdfgs/dgfdhfgdh",
     bio: "Hello, my name is user, nice to meet you",
@@ -54,12 +54,12 @@ const userDetails = {
   },
   likes: [
     {
-      userHandle: "user",
-      screamId: "hh7O5oWfWucVzGbHH2pa"
+      username: "user",
+      postId: "hh7O5oWfWucVzGbHH2pa"
     },
     {
-      userHandle: "user",
-      screamId: "3IOnFoQexRcofs5OhBXO"
+      username: "user",
+      postId: "3IOnFoQexRcofs5OhBXO"
     }
   ]
 };

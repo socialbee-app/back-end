@@ -4,7 +4,13 @@ const app = require("express")();
 
 const { isAuthenticated } = require("./util/middleware/isAuthenticated");
 
-const { getAllPosts, addPost } = require("./controllers/posts");
+const {
+  getAllPosts,
+  addPost,
+  getPost,
+  addPostComment
+} = require("./controllers/posts");
+
 const {
   signup,
   login,
@@ -16,6 +22,11 @@ const {
 // Post Routes
 app.get("/posts", getAllPosts);
 app.post("/post", isAuthenticated, addPost);
+app.get("/post/:postId", getPost);
+// Todo: delete post
+// Todo: like post
+// Todo: unlike post
+app.post("/post/:postId/comment", isAuthenticated, addPostComment);
 
 // Users Routes
 app.post("/signup", signup);
