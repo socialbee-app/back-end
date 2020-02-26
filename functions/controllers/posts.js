@@ -21,13 +21,18 @@ exports.addPost = (req, res) => {
   const newPost = {
     body: req.body.body,
     username: req.user.username,
-    createdAt: new Date().toISOString()
+    userImage: req.user.imageUrl,
+    createdAt: new Date().toISOString(),
+    likeCount: 0,
+    commentCount: 0
   };
 
   db.collection("posts")
     .add(newPost)
     .then(doc => {
-      res.json({ message: `document ${doc.id} successfully created` });
+      const postRes = newPost;
+      postRes.postId = doc.id;
+      res.json(postRes);
     })
     .catch(err => {
       res.status(500).json({ error: "error adding post" });
@@ -86,6 +91,9 @@ exports.addPostComment = (req, res) => {
       if (!doc.exists) {
         return res.status(404).json({ error: "Post not found" });
       }
+      return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
+    })
+    .then(() => {
       return db.collection("comments").add(newComment);
     })
     .then(() => {
@@ -94,5 +102,129 @@ exports.addPostComment = (req, res) => {
     .catch(err => {
       console.log(err);
       return res.status(500).json({ error: "Something went wrong" });
+    });
+};
+
+// Like a post
+exports.likePost = (req, res) => {
+  // get matching like and post document
+  // check if the post exists
+  // check if the post has been liked already
+  // if not, add like data and increment like count in db and response
+
+  const likeDoc = db
+    .collection("likes")
+    .where("username", "==", req.user.username)
+    .where("postId", "==", req.params.postId)
+    .limit(1);
+
+  const postDoc = db.doc(`/posts/${req.params.postId}`);
+
+  let postData = {};
+
+  postDoc
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        postData = doc.data();
+        postData.postId = doc.id;
+        return likeDoc.get();
+      } else {
+        return res.status(404).json({ error: "Post not found" });
+      }
+    })
+    .then(data => {
+      if (data.empty) {
+        return db
+          .collection("likes")
+          .add({
+            postId: req.params.postId,
+            username: req.user.username
+          })
+          .then(() => {
+            postData.likeCount++;
+            return postDoc.update({ likeCount: postData.likeCount });
+          })
+          .then(() => {
+            return res.json(postData);
+          });
+      } else {
+        return res.status(400).json({ error: "Post already liked" });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err.code });
+    });
+};
+
+// Unlike a post
+exports.unlikePost = (req, res) => {
+  const likeDoc = db
+    .collection("likes")
+    .where("username", "==", req.user.username)
+    .where("postId", "==", req.params.postId)
+    .limit(1);
+
+  const postDoc = db.doc(`/posts/${req.params.postId}`);
+
+  let postData = {};
+
+  postDoc
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        postData = doc.data();
+        postData.postId = doc.id;
+        return likeDoc.get();
+      } else {
+        return res.status(404).json({ error: "Post not found" });
+      }
+    })
+    .then(data => {
+      if (!data.empty) {
+        return db
+          .doc(`/likes/${data.docs[0].id}`)
+          .delete()
+          .then(() => {
+            postData.likeCount--;
+            return postDoc
+              .update({ likeCount: postData.likeCount })
+              .then(() => {
+                return res.json(postData);
+              });
+          });
+      } else {
+        return res.status(400).json({ error: "Post not liked" });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err.code });
+    });
+};
+
+// Delete a post
+exports.deletePost = (req, res) => {
+  const postDoc = db.doc(`/posts/${req.params.postId}`);
+
+  postDoc
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        if (doc.data().username !== req.user.username) {
+          return res.status(403).json({ error: "Unauthorized" });
+        }
+        return postDoc.delete();
+      } else {
+        return res.status(404).json({ error: "Post not found" });
+      }
+    })
+    .then(() => {
+      res.json({ message: "Post deleted" });
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ error: err.code });
     });
 };

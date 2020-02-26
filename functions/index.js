@@ -8,7 +8,10 @@ const {
   getAllPosts,
   addPost,
   getPost,
-  addPostComment
+  addPostComment,
+  likePost,
+  unlikePost,
+  deletePost
 } = require("./controllers/posts");
 
 const {
@@ -23,9 +26,9 @@ const {
 app.get("/posts", getAllPosts);
 app.post("/post", isAuthenticated, addPost);
 app.get("/post/:postId", getPost);
-// Todo: delete post
-// Todo: like post
-// Todo: unlike post
+app.delete("/post/:postId", isAuthenticated, deletePost);
+app.get("/post/:postId/like", isAuthenticated, likePost);
+app.get("/post/:postId/unlike", isAuthenticated, unlikePost);
 app.post("/post/:postId/comment", isAuthenticated, addPostComment);
 
 // Users Routes
