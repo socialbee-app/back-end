@@ -47,10 +47,11 @@ exports.api = functions.https.onRequest(app);
 exports.createLikeNotification = functions.firestore
   .document("/likes/{id}")
   .onCreate(snapshot => {
-    db.doc(`/posts/${snapshot.data().postId}`)
+    return db
+      .doc(`/posts/${snapshot.data().postId}`)
       .get()
       .then(doc => {
-        if (doc.exists) {
+        if (doc.exists && doc.data().username !== snapshot.data().username) {
           return db.doc(`/notifications/${snapshot.id}`).set({
             recipient: doc.data().username,
             sender: snapshot.data().username,
@@ -61,36 +62,26 @@ exports.createLikeNotification = functions.firestore
           });
         }
       })
-      .then(() => {
-        return;
-      })
-      .catch(err => {
-        console.log(err);
-        return;
-      });
+      .catch(err => console.log(err));
   });
 
 exports.deleteLikeNotification = functions.firestore
   .document("/likes/{id}")
   .onDelete(snapshot => {
-    db.doc(`/notifications/${snapshot.id}`)
+    return db
+      .doc(`/notifications/${snapshot.id}`)
       .delete()
-      .then(() => {
-        return;
-      })
-      .catch(err => {
-        console.log(err);
-        return;
-      });
+      .catch(err => console.log(err));
   });
 
 exports.createCommentNotification = functions.firestore
   .document("/comments/{id}")
   .onCreate(snapshot => {
-    db.doc(`/posts/${snapshot.data().postId}`)
+    return db
+      .doc(`/posts/${snapshot.data().postId}`)
       .get()
       .then(doc => {
-        if (doc.exists) {
+        if (doc.exists && doc.data().username !== snapshot.data().username) {
           return db.doc(`/notifications/${snapshot.id}`).set({
             recipient: doc.data().username,
             sender: snapshot.data().username,
@@ -101,11 +92,5 @@ exports.createCommentNotification = functions.firestore
           });
         }
       })
-      .then(() => {
-        return;
-      })
-      .catch(err => {
-        console.log(err);
-        return;
-      });
+      .catch(err => console.log(err));
   });
